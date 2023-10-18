@@ -364,8 +364,15 @@ class DatabaseEntriesRepository implements Contract, ClearableRepository, Prunab
      */
     public function clear()
     {
-        $this->table('telescope_entries')->delete();
-        $this->table('telescope_monitoring')->delete();
+        $data = DB::selectOne("SHOW TABLE STATUS LIKE 'telescope_entries'");
+
+        $this->table('telescope_entries_tags')->truncate();
+        $this->table('telescope_entries')->truncate();
+        $this->table('telescope_monitoring')->truncate();
+
+        DB::update("ALTER TABLE 'telescope_entries' AUTO_INCREMENT = :nextSequence;", [
+            'nextSequence' => $data['Auto_increment'] ?? 1,
+        ]);
     }
 
     /**
